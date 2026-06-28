@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SignalDeck — IT Operations War Room</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">◈</div>
+      <div>
+        <h1>SignalDeck</h1>
+        <p id="team-label">Infrastructure operations war room</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary btn-sm" id="btn-export">Export team data</button>
+      <button class="btn btn-secondary btn-sm" id="btn-import">Import</button>
+      <input type="file" id="import-file" accept=".json" hidden>
+    </div>
+  </div>
+</header>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <p class="nav-label">Command</p>
+    <ul class="tab-nav">
+      <li><button data-tab="command" class="active">◈ Signal Board</button></li>
+      <li><button data-tab="incidents">⚡ Incidents</button></li>
+      <li><button data-tab="runbooks">📋 Runbooks</button></li>
+    </ul>
+    <p class="nav-label">Awareness</p>
+    <ul class="tab-nav">
+      <li><button data-tab="topology">🔗 Topology</button></li>
+      <li><button data-tab="certs">🔐 Cert Watch</button></li>
+      <li><button data-tab="changes">📅 Change Radar</button></li>
+    </ul>
+    <p class="nav-label">Team</p>
+    <ul class="tab-nav">
+      <li><button data-tab="handoff">🔄 Shift Handoff</button></li>
+      <li><button data-tab="settings">⚙ Settings</button></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+
+    <!-- SIGNAL BOARD -->
+    <section id="command" class="panel active">
+      <div class="panel-header">
+        <h2>Signal Board</h2>
+        <p>Situational awareness at a glance — incidents, certs, changes, and team posture. All data stays in your browser.</p>
+      </div>
+      <div class="grid-4" id="signal-grid"></div>
+      <div class="grid-2" style="margin-top:1rem">
+        <div class="card">
+          <h3>Active incidents</h3>
+          <ul id="command-incidents" class="runbook-list"></ul>
+        </div>
+        <div class="card">
+          <h3>Certs expiring soon</h3>
+          <ul id="command-certs" class="runbook-list"></ul>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <h3>Upcoming changes (7 days)</h3>
+        <ul id="command-changes" class="runbook-list"></ul>
+      </div>
+    </section>
+
+    <!-- INCIDENTS -->
+    <section id="incidents" class="panel">
+      <div class="panel-header">
+        <h2>Incident Commander</h2>
+        <p>Structured war room — timeline, roles, and action log. Export a postmortem stub when resolved.</p>
+      </div>
+      <div class="form-row">
+        <button class="btn btn-primary" id="btn-new-incident">+ New incident</button>
+        <select id="incident-filter" style="width:auto">
+          <option value="active">Active only</option>
+          <option value="all">All incidents</option>
+        </select>
+      </div>
+      <div class="split">
+        <div>
+          <ul id="incident-list" class="runbook-list"></ul>
+        </div>
+        <div id="incident-detail" class="card">
+          <p class="empty">Select or create an incident</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RUNBOOKS -->
+    <section id="runbooks" class="panel">
+      <div class="panel-header">
+        <h2>Runbook Vault</h2>
+        <p>Battle-tested procedures for 3 AM pages. Check off steps as you execute — progress saves automatically.</p>
+      </div>
+      <input type="search" id="runbook-search" placeholder="Search runbooks…" style="margin-bottom:1rem;max-width:320px">
+      <div class="split">
+        <ul id="runbook-list" class="runbook-list"></ul>
+        <div id="runbook-detail" class="card">
+          <p class="empty">Select a runbook</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOPOLOGY -->
+    <section id="topology" class="panel">
+      <div class="panel-header">
+        <h2>Dependency Atlas</h2>
+        <p>Map services and upstream dependencies. Estimate blast radius before changes.</p>
+      </div>
+      <div class="form-row">
+        <input id="svc-name" placeholder="Service name" style="max-width:180px">
+        <input id="svc-tier" placeholder="Tier (e.g. Tier-1)" style="max-width:120px">
+        <input id="svc-deps" placeholder="Depends on (comma-separated)" style="flex:1;min-width:160px">
+        <button class="btn btn-primary" id="btn-add-service">Add service</button>
+      </div>
+      <div id="topology-map" class="topology-grid"></div>
+    </section>
+
+    <!-- CERT WATCH -->
+    <section id="certs" class="panel">
+      <div class="panel-header">
+        <h2>Cert Watch</h2>
+        <p>Track TLS and internal certificates. Get 30/60/90-day visibility before outages.</p>
+      </div>
+      <div class="form-row">
+        <input id="cert-name" placeholder="Common name / SAN" style="flex:1">
+        <input id="cert-expiry" type="date" style="width:auto">
+        <input id="cert-owner" placeholder="Owner team" style="max-width:140px">
+        <button class="btn btn-primary" id="btn-add-cert">Add cert</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <table class="cert-table">
+          <thead>
+            <tr><th>Name</th><th>Expires</th><th>Days left</th><th>Owner</th><th></th></tr>
+          </thead>
+          <tbody id="cert-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CHANGE RADAR -->
+    <section id="changes" class="panel">
+      <div class="panel-header">
+        <h2>Change Radar</h2>
+        <p>Maintenance windows and planned changes — avoid collision during incidents.</p>
+      </div>
+      <div class="form-row">
+        <input id="change-title" placeholder="Change title" style="flex:1">
+        <input id="change-date" type="datetime-local" style="width:auto">
+        <select id="change-risk" style="width:auto">
+          <option value="low">Low risk</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+        <button class="btn btn-primary" id="btn-add-change">Schedule</button>
+      </div>
+      <ul id="change-list" class="runbook-list"></ul>
+    </section>
+
+    <!-- HANDOFF -->
+    <section id="handoff" class="panel">
+      <div class="panel-header">
+        <h2>Shift Handoff</h2>
+        <p>Compile open incidents, cert warnings, and notes into a markdown handoff — copy to Slack or Teams.</p>
+      </div>
+      <div class="card">
+        <div class="form-row">
+          <input id="handoff-from" placeholder="Outgoing engineer" style="flex:1">
+          <input id="handoff-to" placeholder="Incoming engineer" style="flex:1">
+        </div>
+        <textarea id="handoff-notes" placeholder="Notes for next shift — ongoing work, watch items, escalations…"></textarea>
+        <div class="form-row" style="margin-top:0.75rem">
+          <button class="btn btn-primary" id="btn-gen-handoff">Generate handoff</button>
+          <button class="btn btn-secondary" id="btn-copy-handoff">Copy to clipboard</button>
+        </div>
+      </div>
+      <div class="handoff-output" id="handoff-output">Click Generate handoff to build the report.</div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="settings" class="panel">
+      <div class="panel-header">
+        <h2>Settings</h2>
+        <p>Team identity and data management. Export JSON to share config with your team via Git.</p>
+      </div>
+      <div class="card">
+        <h3>Team</h3>
+        <div class="form-row">
+          <label>Team name</label>
+          <input id="setting-team" placeholder="Platform Engineering" style="flex:1">
+        </div>
+        <div class="form-row">
+          <label>On-call rotation</label>
+          <input id="setting-oncall" placeholder="PagerDuty schedule link or name" style="flex:1">
+        </div>
+        <button class="btn btn-primary" id="btn-save-settings">Save settings</button>
+      </div>
+      <div class="card">
+        <h3>Data</h3>
+        <p style="color:var(--muted);font-size:0.88rem;margin-bottom:0.75rem">All data is stored in browser localStorage. Export regularly for team backups.</p>
+        <button class="btn btn-danger btn-sm" id="btn-reset">Reset all data to defaults</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<p class="status-bar" id="status-bar">Ready — local only, nothing leaves your browser.</p>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

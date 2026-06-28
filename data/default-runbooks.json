@@ -1,0 +1,134 @@
+[
+  {
+    "id": "rb-dc-unreachable",
+    "title": "Domain Controller Unreachable",
+    "severity": "SEV1",
+    "category": "Identity",
+    "tags": ["ad", "dns", "windows"],
+    "summary": "Users cannot authenticate; GPO and DNS may be impacted.",
+    "steps": [
+      "Confirm scope — one DC or entire site?",
+      "Ping and Test-NetConnection to DC IP on port 389/636",
+      "Check hypervisor host health if virtualized",
+      "Console or iLO/KVM — safe mode / recovery",
+      "Verify AD replication partners if partial outage",
+      "Fail DNS to secondary DC if needed",
+      "Document timeline and open change if rebuild required"
+    ]
+  },
+  {
+    "id": "rb-cert-expiry",
+    "title": "Certificate Expiring < 14 Days",
+    "severity": "SEV2",
+    "category": "Security",
+    "tags": ["pki", "tls", "iis"],
+    "summary": "Prevent service outage from expired TLS or code-signing cert.",
+    "steps": [
+      "Identify cert thumbprint, SANs, and binding (IIS, LB, API)",
+      "Check if auto-renew is enabled (ACME, internal CA template)",
+      "Schedule maintenance window if manual bind required",
+      "Request/reissue cert from PKI team or vendor portal",
+      "Deploy to all nodes in the farm — verify chain",
+      "Run SSL Labs or openssl s_client smoke test",
+      "Update cert inventory in team tracker"
+    ]
+  },
+  {
+    "id": "rb-disk-critical",
+    "title": "Disk Space Critical (< 10% Free)",
+    "severity": "SEV2",
+    "category": "Compute",
+    "tags": ["windows", "linux", "storage"],
+    "summary": "Prevent application crash from full volume.",
+    "steps": [
+      "Identify mount point and largest consumers (WinDirStat / du)",
+      "Check for runaway logs, dumps, or backup staging",
+      "Compress or archive per retention policy",
+      "Expand volume (VMware/Hyper-V grow + OS extend)",
+      "Verify monitoring alert threshold after cleanup",
+      "Root-cause: log rotation, backup path, temp files"
+    ]
+  },
+  {
+    "id": "rb-vm-host-alarm",
+    "title": "VMware Host Hardware Alarm",
+    "severity": "SEV1",
+    "category": "Virtualization",
+    "tags": ["vmware", "hardware", "ha"],
+    "summary": "Host degradation — plan evacuation before failure.",
+    "steps": [
+      "Review vCenter alarm — memory, CPU, storage, PSU, fan",
+      "Check CIM/health sensors and vendor support case status",
+      "vMotion workloads off host if HA capacity allows",
+      "Enter maintenance mode before hardware service",
+      "Validate cluster HA/DRS compliance after evacuation",
+      "Schedule firmware/driver update if advisory applies"
+    ]
+  },
+  {
+    "id": "rb-dns-failure",
+    "title": "DNS Resolution Failure",
+    "severity": "SEV1",
+    "category": "Network",
+    "tags": ["dns", "ad", "dhcp"],
+    "summary": "Wide impact — apps and auth may fail together.",
+    "steps": [
+      "Test recursive vs authoritative (nslookup/dig from client and server)",
+      "Verify DNS service running on all DCs / BIND nodes",
+      "Check forwarders and root hints",
+      "Review recent zone or conditional forwarder changes",
+      "Flush client cache; verify DHCP option 006",
+      "Escalate to network if upstream firewall blocking 53/853"
+    ]
+  },
+  {
+    "id": "rb-patch-rollback",
+    "title": "Failed Patch Deployment — Rollback",
+    "severity": "SEV2",
+    "category": "Patching",
+    "tags": ["wsus", "sccm", "linux"],
+    "summary": "Restore service after bad patch cycle.",
+    "steps": [
+      "Stop further deployment ring expansion",
+      "Identify affected OS/build and KB/package list",
+      "Windows: uninstall KB or restore snapshot / checkpoint",
+      "Linux: yum/dnf history undo or snapshot revert",
+      "Validate application smoke tests on pilot group",
+      "Open problem ticket with vendor if widespread",
+      "Update patch exemption list until root cause known"
+    ]
+  },
+  {
+    "id": "rb-db-connection",
+    "title": "Database Connection Pool Exhausted",
+    "severity": "SEV2",
+    "category": "Data",
+    "tags": ["sql", "app", "performance"],
+    "summary": "App timeouts — often cascade to full outage.",
+    "steps": [
+      "Check active sessions vs max_connections",
+      "Identify blocking queries and long transactions",
+      "Kill runaway sessions per approval policy",
+      "Restart app pool / service if leak suspected",
+      "Review connection string pooling settings",
+      "Scale read replica or increase pool temporarily",
+      "Schedule code review for connection leaks"
+    ]
+  },
+  {
+    "id": "rb-f5-pool-down",
+    "title": "F5 Pool Member Down",
+    "severity": "SEV2",
+    "category": "Load Balancing",
+    "tags": ["f5", "iis", "health-monitor"],
+    "summary": "Traffic may be imbalanced or failing over.",
+    "steps": [
+      "Check pool member status and health monitor logs",
+      "SSH to member — verify service listening on monitor port",
+      "Compare monitor path vs actual app health endpoint",
+      "Disable bad member; confirm remaining capacity",
+      "Review recent deploy or cert change on pool",
+      "Re-enable after fix; watch connection counts"
+    ]
+  }
+]
