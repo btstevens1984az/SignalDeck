@@ -6,15 +6,6 @@ Inspired by modern AI SRE platforms (OpenSRE, HolmesGPT, Runbook Hub) but delibe
 
 Built for the **3 AM page** — when evidence is scattered across Slack, dashboards, and runbooks, SignalDeck gives your team one place to command the incident, check off procedures, and hand off cleanly.
 
-## Screenshots
-
-| View | Preview |
-|------|---------|
-| [Signal Board](#run) | ![Signal Board — situational awareness dashboard](media/signal-board.png) |
-| [Incident Commander](#run) | ![Incident war room with timeline](media/incidents.png) |
-| [Runbook Vault](#run) | ![Executable runbooks with step checklists](media/runbooks.png) |
-| [Topology & Handoff](#run) | ![Dependency atlas and shift handoff export](media/topology-handoff.png) |
-
 ### Signal Board
 
 At-a-glance posture: active incidents, certs expiring, changes this week, services mapped, and runbooks ready.
